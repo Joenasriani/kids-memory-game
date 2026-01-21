@@ -13,29 +13,32 @@
             background: rgb(45, 90, 39); 
             user-select: none;
             touch-action: manipulation;
+            height: 100vh; /* Fallback */
+            height: 100dvh; /* Dynamic Viewport Height */
+            width: 100vw;
         }
         .jungle-bg {
             background: linear-gradient(to bottom, rgb(74, 222, 128), rgb(22, 101, 52));
             position: relative;
-            height: 100dvh;
-            width: 100vw;
+            height: 100%;
+            width: 100%;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
         }
         .fredoka { font-family: 'Fredoka One', cursive; }
         
         /* Banked Asset: Vine Graphics */
         .vine {
             position: absolute;
-            top: -20px;
+            top: -10px;
             width: 4px;
             background: rgb(20, 83, 45);
-            height: 15vh;
-            border-radius: 20px;
+            border-radius: 0 0 20px 20px;
             z-index: 1;
+            transform-origin: top center;
+            animation: sway 5s ease-in-out infinite;
         }
         
         /* Banked Asset: Leaf Graphics */
@@ -46,6 +49,11 @@
             background: rgb(34, 197, 94);
             border-radius: 50% 0 50% 0;
             transform: rotate(-15deg);
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
         }
 
         .number-block {
@@ -90,17 +98,33 @@
 
         .shake { animation: shake 0.2s ease-in-out 0s 2; }
 
-        .game-canvas {
-            width: 90vw;
-            max-width: 500px;
-            margin: auto;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+        /* Adaptive Grid Container */
+        .game-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1rem;
         }
 
-        @media (min-width: 1024px) {
-            .game-canvas { max-width: 600px; gap: 20px; }
+        .game-canvas {
+            /* Smart sizing: fits width but capped by height to ensure square fits on screen */
+            width: 100%;
+            max-width: min(85vw, 55vh); 
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: clamp(10px, 2vw, 24px); /* Responsive gap */
+            margin: auto;
+        }
+
+        /* Landscape adjustments for short screens (mobile landscape) */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .game-canvas {
+                max-width: min(50vw, 65vh); /* Allow slightly taller relative to height in landscape */
+                gap: 8px;
+            }
+            .vine { display: none; } /* Hide vines to clear view */
         }
 
         .level-up-anim {
@@ -130,23 +154,69 @@
             transform: translate(-50%, -50%) scale(1);
             opacity: 1;
         }
+
+        #fullscreen-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            padding: 0.5rem;
+            border-radius: 50%;
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #fullscreen-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
 
-<div class="jungle-bg p-4 sm:p-6 lg:p-10">
+<div class="jungle-bg">
     <!-- Decorative Vines -->
-    <div class="vine" style="left: 10%"><div class="leaf" style="top: 40px; left: -15px"></div></div>
-    <div class="vine" style="left: 85%"><div class="leaf" style="top: 60px; right: -15px; transform: scaleX(-1)"></div></div>
+    <div class="vine" style="left: 5%; height: 20vh; animation-delay: 0s;">
+        <div class="leaf" style="top: 80%; left: -20px; transform: rotate(-45deg)"></div>
+        <div class="leaf" style="top: 40%; left: 10px; transform: rotate(45deg) scaleX(-1)"></div>
+    </div>
+    <div class="vine" style="left: 15%; height: 12vh; animation-delay: 1s;">
+        <div class="leaf" style="top: 70%; left: -10px; transform: rotate(-10deg)"></div>
+    </div>
+    <div class="vine" style="left: 28%; height: 25vh; animation-delay: 2s;">
+        <div class="leaf" style="top: 85%; left: 10px; transform: scaleX(-1) rotate(10deg)"></div>
+        <div class="leaf" style="top: 30%; left: -15px; transform: rotate(-20deg)"></div>
+    </div>
+    <div class="vine" style="left: 50%; height: 10vh; animation-delay: 0.5s;">
+        <div class="leaf" style="top: 60%; left: -12px;"></div>
+    </div>
+    <div class="vine" style="left: 65%; height: 22vh; animation-delay: 1.5s;">
+        <div class="leaf" style="top: 80%; left: -20px; transform: rotate(-30deg)"></div>
+    </div>
+    <div class="vine" style="left: 80%; height: 15vh; animation-delay: 2.5s;">
+        <div class="leaf" style="top: 75%; left: 10px; transform: scaleX(-1)"></div>
+        <div class="leaf" style="top: 20%; left: -8px; transform: rotate(-10deg)"></div>
+    </div>
+    <div class="vine" style="left: 92%; height: 18vh; animation-delay: 0.8s;">
+        <div class="leaf" style="top: 85%; left: -15px; transform: rotate(-45deg)"></div>
+    </div>
+
+    <!-- Full Screen Button -->
+    <button id="fullscreen-btn" title="Toggle Full Screen">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+    </button>
     
-    <!-- Praise Pop-up Element -->
+    <!-- Praise Pop-up -->
     <div id="praise-pop" class="fredoka text-4xl sm:text-7xl text-yellow-300">NICE!</div>
 
-    <!-- Header Section -->
-    <div class="w-full max-w-4xl flex justify-between items-start z-10">
+    <!-- Header Section (Flex-none to keep size stable) -->
+    <div class="w-full max-w-6xl flex justify-between items-start pt-4 px-4 sm:px-8 z-10 flex-none landscape:pt-2">
         <div class="monkey-float relative">
-            <!-- Banked Asset: Monkey SVG Code -->
-            <svg class="w-16 h-16 sm:w-24 sm:h-24" viewBox="0 0 100 100">
+            <svg class="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 landscape:w-12 landscape:h-12" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="rgb(120, 53, 15)" />
                 <circle cx="50" cy="55" r="32" fill="rgb(217, 119, 6)" opacity="0.4" />
                 <circle cx="15" cy="50" r="12" fill="rgb(120, 53, 15)" />
@@ -157,70 +227,65 @@
                 <circle cx="65" cy="45" r="3" fill="black" />
                 <path d="M 35 65 Q 50 75 65 65" stroke="white" stroke-width="3" fill="transparent" />
             </svg>
-            <div class="absolute -bottom-1 -right-2 sm:-bottom-2 sm:-right-4 bg-yellow-400 p-1 sm:p-2 rounded-full border-2 sm:border-4 border-yellow-600 shadow-lg">
-                <div id="timer" class="fredoka text-xs sm:text-xl text-yellow-900">0.0s</div>
+            <div class="absolute -bottom-1 -right-2 bg-yellow-400 p-1 rounded-full border-2 border-yellow-600 shadow-lg">
+                <div id="timer" class="fredoka text-xs sm:text-base lg:text-xl text-yellow-900 leading-none px-1">0.0s</div>
             </div>
         </div>
 
-        <div class="text-right">
-            <h1 class="fredoka text-lg sm:text-3xl text-white drop-shadow-lg text-right">THE MEMORY<br>CHALLENGE</h1>
-            <div id="level-indicator" class="text-yellow-200 fredoka text-base sm:text-2xl">Level: 1</div>
+        <div class="text-right mr-12 sm:mr-0">
+            <h1 class="fredoka text-lg sm:text-2xl lg:text-4xl text-white drop-shadow-lg text-right leading-tight">THE MEMORY<br>CHALLENGE</h1>
+            <div id="level-indicator" class="text-yellow-200 fredoka text-base sm:text-xl lg:text-2xl mt-1">Level: 1</div>
         </div>
     </div>
 
-    <!-- Game Board (Grid) -->
-    <div id="game-board" class="game-canvas py-4 sm:py-8 hidden">
-    </div>
-
-    <!-- Main Menu & Instructions -->
-    <div id="menu-area" class="z-10 w-full flex flex-col items-center flex-grow justify-center">
-        <div id="instructions" class="bg-white/20 backdrop-blur-sm p-5 sm:p-8 rounded-3xl mb-10 text-center max-w-xs sm:max-w-md border-2 border-white/30 shadow-xl">
-            <h2 class="fredoka text-white text-2xl sm:text-4xl mb-4">How to Play</h2>
-            <p class="text-white text-lg sm:text-2xl leading-relaxed">Watch the numbers, remember where they are, and tap them in order 1, 2, 3...</p>
-        </div>
+    <!-- Middle Section: Dynamic Spacing Container -->
+    <!-- This container grows to fill all available space, centering the board/menu -->
+    <div class="game-container z-10">
         
-        <button id="start-btn" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-12 py-8 sm:px-24 sm:py-14 rounded-3xl sm:rounded-[3rem] fredoka text-4xl sm:text-7xl flex items-center gap-4 sm:gap-8 border-b-[12px] sm:border-b-[20px] border-yellow-600 active:border-b-0 active:translate-y-4 transition-all shadow-2xl">
-            <!-- Banked Asset: Paw Icon SVG -->
-            <svg class="w-10 h-10 sm:w-20 sm:h-20" fill="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="15" r="5" />
-                <circle cx="6" cy="7" r="3" />
-                <circle cx="12" cy="5" r="3" />
-                <circle cx="18" cy="7" r="3" />
-            </svg>
-            START
-        </button>
+        <!-- Game Board (Grid) -->
+        <div id="game-board" class="game-canvas hidden"></div>
+
+        <!-- Main Menu & Instructions -->
+        <div id="menu-area" class="w-full flex flex-col items-center justify-center">
+            <div id="instructions" class="bg-white/20 backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl mb-4 sm:mb-8 text-center max-w-[85vw] sm:max-w-md border-2 border-white/30 shadow-xl">
+                <h2 class="fredoka text-white text-xl sm:text-3xl mb-2 sm:mb-4">How to Play</h2>
+                <p class="text-white text-sm sm:text-lg lg:text-xl leading-relaxed">Watch the numbers, remember where they are, and tap them in order 1, 2, 3...</p>
+            </div>
+            
+            <button id="start-btn" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-8 py-4 sm:px-16 sm:py-8 lg:px-20 lg:py-10 rounded-2xl sm:rounded-[2.5rem] fredoka text-2xl sm:text-5xl lg:text-6xl flex items-center gap-3 sm:gap-6 border-b-[6px] sm:border-b-[12px] border-yellow-600 active:border-b-0 active:translate-y-2 transition-all shadow-2xl">
+                <svg class="w-6 h-6 sm:w-12 sm:h-12 lg:w-16 lg:h-16" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="15" r="5" />
+                    <circle cx="6" cy="7" r="3" />
+                    <circle cx="12" cy="5" r="3" />
+                    <circle cx="18" cy="7" r="3" />
+                </svg>
+                START
+            </button>
+        </div>
+
     </div>
 
-    <!-- Feedback Message Area -->
-    <div id="message" class="fredoka text-2xl sm:text-4xl text-white mb-10 text-center h-12 sm:h-16 hidden items-center justify-center z-10 drop-shadow-lg"></div>
+    <!-- Footer Area (Flex-none) -->
+    <div class="w-full flex-none h-16 sm:h-20 lg:h-24 flex items-start justify-center z-10 landscape:h-12">
+        <div id="message" class="fredoka text-xl sm:text-3xl lg:text-4xl text-white text-center hidden drop-shadow-lg animate-bounce"></div>
+    </div>
 
     <!-- Error/Game Over Modal -->
-    <div id="overlay" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 sm:p-12 rounded-3xl text-center max-w-sm w-full shadow-2xl">
-            <h2 id="modal-title" class="fredoka text-3xl sm:text-5xl text-red-600 mb-4">OH BANANAS!</h2>
-            <p id="modal-text" class="text-gray-700 text-lg sm:text-2xl mb-6 sm:mb-10">Level is tricky!</p>
-            <button onclick="closeModal()" class="bg-yellow-500 text-white fredoka text-xl sm:text-3xl px-6 py-3 sm:py-4 rounded-full hover:bg-yellow-600 w-full">TRY AGAIN</button>
+    <div id="overlay" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 sm:p-10 rounded-3xl text-center max-w-sm w-full shadow-2xl transform scale-100 transition-transform">
+            <h2 id="modal-title" class="fredoka text-3xl sm:text-5xl text-yellow-600 mb-4"></h2>
+            <p id="modal-text" class="text-gray-700 text-lg sm:text-2xl mb-6 sm:mb-8 font-bold"></p>
+            <button onclick="closeModal()" class="bg-yellow-500 text-white fredoka text-xl sm:text-2xl px-8 py-3 rounded-full hover:bg-yellow-600 w-full shadow-lg active:scale-95 transition-transform">TRY AGAIN</button>
         </div>
     </div>
 </div>
 
 <script>
     // --- BANKED ASSETS & DATA ---
-    // These lists are hardcoded so no external generation is needed.
     const praises = [
-        "GOOD JOB!", 
-        "GREAT!", 
-        "BRAVO!", 
-        "NICE!", 
-        "AWESOME!", 
-        "YOU GOT IT!", 
-        "SUPER!", 
-        "BRILLIANT!", 
-        "FANTASTIC!", 
-        "KEEP IT UP!",
-        "YOU ARE THE BEST!",
-        "YOU MUST BE A CHAMPION!",
-        "WOW!"
+        "GOOD JOB!", "GREAT!", "BRAVO!", "NICE!", "AWESOME!", 
+        "YOU GOT IT!", "SUPER!", "BRILLIANT!", "FANTASTIC!", 
+        "KEEP IT UP!", "YOU ARE THE BEST!", "YOU MUST BE A CHAMPION!", "WOW!"
     ];
 
     // --- GAME STATE VARIABLES ---
@@ -234,6 +299,7 @@
     const modalTitle = document.getElementById('modal-title');
     const modalText = document.getElementById('modal-text');
     const praisePop = document.getElementById('praise-pop');
+    const fsBtn = document.getElementById('fullscreen-btn');
 
     let audioCtx = null;
     let currentLevel = 1;
@@ -242,45 +308,29 @@
     let startTime;
     let timerInterval;
 
-    // --- AUDIO SYSTEM (Synthesized Locally) ---
+    // --- FULL SCREEN LOGIC ---
+    fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    });
+
+    // --- AUDIO SYSTEM DISABLED ---
     function initAudio() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Disabled
     }
 
     function playSound(type) {
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-
-        if (type === 'correct') {
-            // High pitch sine wave
-            osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
-            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-            osc.start(); osc.stop(now + 0.1);
-        } else if (type === 'wrong') {
-            // Sawtooth low buzz
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(50, now + 0.3);
-            gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-            osc.start(); osc.stop(now + 0.3);
-        } else if (type === 'levelUp') {
-            // Triangle wave arpeggio effect
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.3);
-            gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-            osc.start(); osc.stop(now + 0.3);
-        } else if (type === 'pop') {
-            // Quick pop sound
-            osc.type = 'sine'; osc.frequency.setValueAtTime(800, now);
-            gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-            osc.start(); osc.stop(now + 0.05);
-        }
+        // Disabled
+        return;
     }
 
     // --- VISUAL EFFECTS ---
     function showPraisePop() {
-        // Randomly select a banked praise phrase
         const praiseText = praises[Math.floor(Math.random() * praises.length)];
         praisePop.innerText = praiseText;
         praisePop.classList.add('active');
@@ -290,8 +340,7 @@
         }, 800);
     }
 
-    // --- GAME LOGIC (ALGORITHMS) ---
-    // Fisher-Yates Shuffle Algorithm (Not AI, pure math)
+    // --- GAME LOGIC ---
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -303,7 +352,7 @@
     function createBlocks() {
         gameBoard.innerHTML = '';
         const gridSlots = Array.from({length: 9}, (_, i) => i);
-        shuffle(gridSlots); // Randomize positions
+        shuffle(gridSlots); 
         const activeSlots = gridSlots.slice(0, currentLevel);
         const levelNumbers = Array.from({length: currentLevel}, (_, i) => i + 1);
         
@@ -331,7 +380,7 @@
         menuArea.classList.add('hidden');
         gameBoard.classList.remove('hidden');
         messageDisplay.classList.remove('hidden');
-        messageDisplay.classList.add('flex');
+        messageDisplay.classList.add('block'); // ensure block display
 
         levelDisplay.innerText = `Level: ${currentLevel}`;
         levelDisplay.classList.remove('level-up-anim');
@@ -341,9 +390,8 @@
         createBlocks();
         gameState = 'MEMORIZING';
         currentStep = 1;
-        messageDisplay.innerText = "LOOK CAREFULLY!";
+        messageDisplay.innerText = "MEMORIZE WHERE EACH NUMBER IS";
         
-        // Dynamic countdown based on level
         let memCountdown = Math.max(1, 3 - Math.floor(currentLevel / 4)); 
         timerDisplay.innerText = `${memCountdown}s`;
         
@@ -362,14 +410,12 @@
     function startPlaying() {
         gameState = 'PLAYING';
         
-        // --- LOGIC: TEXT DISPLAY BASED ON LEVEL ---
         if (currentLevel === 1) {
             messageDisplay.innerText = "TAP IT";
         } else {
-            messageDisplay.innerText = "TAP THEM IN THE RIGHT SEQUENCE";
+            messageDisplay.innerText = "TAP THE NUMBERS IN THE RIGHT SEQUENCE";
         }
 
-        // Hide the numbers
         document.querySelectorAll('.number-block').forEach(b => b.classList.add('hidden-num'));
         startTime = Date.now();
         timerInterval = setInterval(updateTimer, 100);
@@ -386,7 +432,6 @@
         
         if (clickedNum === currentStep) {
             playSound('correct');
-            // Correct click logic
             block.classList.remove('hidden-num');
             block.classList.add('opacity-50', 'bg-green-400');
             currentStep++;
@@ -394,7 +439,6 @@
                 levelComplete();
             }
         } else {
-            // Wrong click logic
             playSound('wrong');
             block.classList.add('shake', 'bg-red-500');
             setTimeout(() => block.classList.remove('shake', 'bg-red-500'), 400);
@@ -406,14 +450,13 @@
         clearInterval(timerInterval);
         gameState = 'ENDED';
         playSound('levelUp');
-        showPraisePop(); // Only called here (end of sequence)
+        showPraisePop(); 
         
         if (currentLevel < 9) {
             messageDisplay.innerHTML = `<span class="text-yellow-300">NEXT LEVEL!</span>`;
             currentLevel++;
             setTimeout(startGame, 1200);
         } else {
-            // Victory State
             messageDisplay.innerText = "MEMORY KING!";
             currentLevel = 1;
             setTimeout(() => {
@@ -429,8 +472,11 @@
         clearInterval(timerInterval);
         gameState = 'ENDED';
         document.querySelectorAll('.number-block').forEach(b => b.classList.remove('hidden-num'));
-        modalTitle.innerText = "OH BANANAS!";
-        modalText.innerText = `Almost finished Level ${currentLevel}!`;
+        
+        const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+        modalTitle.innerText = randomPraise;
+        modalText.innerText = `You reached Level ${currentLevel}! Try again!`;
+        
         overlay.classList.remove('hidden');
         overlay.classList.add('flex');
     }
