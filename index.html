@@ -225,7 +225,7 @@
 
     <!-- Header Section (Flex-none to keep size stable) -->
     <div class="w-full max-w-6xl flex justify-between items-start pt-4 px-4 sm:px-8 z-10 flex-none landscape:pt-2">
-        <div class="monkey-float relative">
+        <div class="monkey-float flex flex-col items-center">
             <svg class="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 landscape:w-12 landscape:h-12" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="rgb(120, 53, 15)" />
                 <circle cx="50" cy="55" r="32" fill="rgb(217, 119, 6)" opacity="0.4" />
@@ -237,8 +237,8 @@
                 <circle cx="65" cy="45" r="3" fill="black" />
                 <path d="M 35 65 Q 50 75 65 65" stroke="white" stroke-width="3" fill="transparent" />
             </svg>
-            <div class="absolute -bottom-1 -right-2 bg-yellow-400 p-1 rounded-full border-2 border-yellow-600 shadow-lg">
-                <div id="timer" class="fredoka text-xs sm:text-base lg:text-xl text-yellow-900 leading-none px-1">0.0s</div>
+            <div class="bg-yellow-400 p-2 rounded-full border-4 border-yellow-600 shadow-lg -mt-2 z-20">
+                <div id="timer" class="fredoka text-lg sm:text-xl lg:text-2xl text-yellow-900 leading-none px-2 min-w-[3ch] text-center">0.0s</div>
             </div>
         </div>
 
@@ -259,7 +259,7 @@
         <div id="menu-area" class="w-full flex flex-col items-center justify-center">
             <div id="instructions" class="bg-white/20 backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl mb-4 sm:mb-8 text-center max-w-[85vw] sm:max-w-md border-2 border-white/30 shadow-xl">
                 <h2 class="fredoka text-white text-xl sm:text-3xl mb-2 sm:mb-4">How to Play</h2>
-                <p class="text-white text-sm sm:text-lg lg:text-xl leading-relaxed">Watch the numbers, remember where they are, and tap them in order 1, 2, 3...</p>
+                <p class="text-white text-sm sm:text-lg lg:text-xl leading-relaxed">Memorize the positions of the numbers. Tap them in order (1, 2, 3...) when they hide. You have 3 lives!</p>
             </div>
             
             <button id="start-btn" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-8 py-4 sm:px-16 sm:py-8 lg:px-20 lg:py-10 rounded-2xl sm:rounded-[2.5rem] fredoka text-2xl sm:text-5xl lg:text-6xl flex items-center gap-3 sm:gap-6 border-b-[6px] sm:border-b-[12px] border-yellow-600 active:border-b-0 active:translate-y-2 transition-all shadow-2xl">
