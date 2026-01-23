@@ -46,7 +46,7 @@
             position: absolute;
             width: 40px;
             height: 25px;
-            background: rgb(34, 197, 94);
+            background: rgb(21, 128, 61); /* Darker Green */
             border-radius: 50% 0 50% 0;
             transform: rotate(-15deg);
         }
@@ -155,10 +155,9 @@
             opacity: 1;
         }
 
-        #fullscreen-btn {
+        /* Common Button Style for Corner Buttons */
+        .corner-btn {
             position: fixed;
-            top: 1rem;
-            right: 1rem;
             z-index: 50;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(4px);
@@ -168,10 +167,14 @@
             transition: all 0.2s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        #fullscreen-btn:hover {
+        .corner-btn:hover {
             background: rgba(255, 255, 255, 0.4);
             transform: scale(1.1);
         }
+
+        #fullscreen-btn { top: 1rem; right: 1rem; }
+        /* Reset button specifically positioned at bottom right */
+        #reset-btn { bottom: 1rem; right: 1rem; }
     </style>
 </head>
 <body>
@@ -203,8 +206,15 @@
         <div class="leaf" style="top: 85%; left: -15px; transform: rotate(-45deg)"></div>
     </div>
 
-    <!-- Full Screen Button -->
-    <button id="fullscreen-btn" title="Toggle Full Screen">
+    <!-- Reset / Home Button (Bottom Right) -->
+    <button id="reset-btn" class="corner-btn" title="Back to Start">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+    </button>
+
+    <!-- Full Screen Button (Top Right) -->
+    <button id="fullscreen-btn" class="corner-btn" title="Toggle Full Screen">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
         </svg>
@@ -235,11 +245,11 @@
         <div class="text-right mr-12 sm:mr-0">
             <h1 class="fredoka text-lg sm:text-2xl lg:text-4xl text-white drop-shadow-lg text-right leading-tight">THE MEMORY<br>CHALLENGE</h1>
             <div id="level-indicator" class="text-yellow-200 fredoka text-base sm:text-xl lg:text-2xl mt-1">Level: 1</div>
+            <div id="lives-indicator" class="text-yellow-200 fredoka text-base sm:text-xl lg:text-2xl mt-1">Lives: 3</div>
         </div>
     </div>
 
     <!-- Middle Section: Dynamic Spacing Container -->
-    <!-- This container grows to fill all available space, centering the board/menu -->
     <div class="game-container z-10">
         
         <!-- Game Board (Grid) -->
@@ -295,11 +305,13 @@
     const timerDisplay = document.getElementById('timer');
     const messageDisplay = document.getElementById('message');
     const levelDisplay = document.getElementById('level-indicator');
+    const livesDisplay = document.getElementById('lives-indicator');
     const overlay = document.getElementById('overlay');
     const modalTitle = document.getElementById('modal-title');
     const modalText = document.getElementById('modal-text');
     const praisePop = document.getElementById('praise-pop');
     const fsBtn = document.getElementById('fullscreen-btn');
+    const resetBtn = document.getElementById('reset-btn');
 
     let audioCtx = null;
     let currentLevel = 1;
@@ -307,6 +319,8 @@
     let gameState = 'IDLE'; 
     let startTime;
     let timerInterval;
+    let memInterval; // Global variable for memorization timer
+    let lives = 3;
 
     // --- FULL SCREEN LOGIC ---
     fsBtn.addEventListener('click', () => {
@@ -319,15 +333,44 @@
         }
     });
 
-    // --- AUDIO SYSTEM DISABLED ---
-    function initAudio() {
-        // Disabled
-    }
+    // --- RESET / HOME LOGIC ---
+    resetBtn.addEventListener('click', () => {
+        // Clear all timers
+        clearInterval(timerInterval);
+        clearInterval(memInterval);
+        
+        // Reset Logic
+        currentLevel = 1;
+        lives = 3;
+        gameState = 'IDLE';
+        
+        // Reset Displays
+        levelDisplay.innerText = `Level: 1`;
+        livesDisplay.innerText = `Lives: 3`;
+        timerDisplay.innerText = '0.0s';
+        
+        // Clear Block Effects
+        const blocks = document.querySelectorAll('.number-block');
+        blocks.forEach(b => {
+            b.classList.remove('shake');
+            b.classList.remove('hidden-num');
+        });
 
-    function playSound(type) {
-        // Disabled
-        return;
-    }
+        // Hide Game Elements
+        gameBoard.classList.add('hidden');
+        messageDisplay.classList.add('hidden');
+        messageDisplay.classList.remove('block');
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        
+        // Show Main Menu
+        menuArea.classList.remove('hidden');
+        startBtn.innerText = "START";
+    });
+
+    // --- AUDIO SYSTEM DISABLED ---
+    function initAudio() { }
+    function playSound(type) { return; }
 
     // --- VISUAL EFFECTS ---
     function showPraisePop() {
@@ -373,10 +416,49 @@
         }
     }
 
+    // New Function: Resets the level WITHOUT shuffling
+    function retryLevel() {
+        gameState = 'MEMORIZING';
+        currentStep = 1;
+        messageDisplay.innerText = "MEMORIZE WHERE EACH NUMBER IS";
+
+        // Reset all blocks visually
+        const blocks = document.querySelectorAll('.number-block');
+        blocks.forEach(b => {
+            b.classList.remove('hidden-num');
+            b.classList.remove('opacity-50');
+            b.classList.remove('bg-green-400');
+            b.classList.add('bg-yellow-400');
+        });
+
+        // Restart timer
+        let memCountdown = Math.max(1, 3 - Math.floor(currentLevel / 4)); 
+        timerDisplay.innerText = `${memCountdown}s`;
+        
+        // Use global memInterval
+        clearInterval(memInterval);
+        memInterval = setInterval(() => {
+            memCountdown--;
+            if (memCountdown <= 0) { 
+                clearInterval(memInterval); 
+                startPlaying(); 
+            } else { 
+                playSound('pop'); 
+                timerDisplay.innerText = `${memCountdown}s`; 
+            }
+        }, 800);
+    }
+
     function startGame() {
         initAudio();
         if (gameState === 'MEMORIZING' || gameState === 'PLAYING') return;
         
+        // Check if we need to reset lives (New Game)
+        if (currentLevel === 1) {
+            lives = 3;
+        }
+        livesDisplay.innerText = `Lives: ${lives}`;
+
         menuArea.classList.add('hidden');
         gameBoard.classList.remove('hidden');
         messageDisplay.classList.remove('hidden');
@@ -395,10 +477,12 @@
         let memCountdown = Math.max(1, 3 - Math.floor(currentLevel / 4)); 
         timerDisplay.innerText = `${memCountdown}s`;
         
-        const memInt = setInterval(() => {
+        // Use global memInterval
+        clearInterval(memInterval);
+        memInterval = setInterval(() => {
             memCountdown--;
             if (memCountdown <= 0) { 
-                clearInterval(memInt); 
+                clearInterval(memInterval); 
                 startPlaying(); 
             } else { 
                 playSound('pop'); 
@@ -413,7 +497,7 @@
         if (currentLevel === 1) {
             messageDisplay.innerText = "TAP IT";
         } else {
-            messageDisplay.innerText = "TAP THE NUMBERS IN THE RIGHT SEQUENCE";
+            messageDisplay.innerText = "TAP THE NUMBERS IN THE RIGHT ORDER!";
         }
 
         document.querySelectorAll('.number-block').forEach(b => b.classList.add('hidden-num'));
@@ -442,7 +526,20 @@
             playSound('wrong');
             block.classList.add('shake', 'bg-red-500');
             setTimeout(() => block.classList.remove('shake', 'bg-red-500'), 400);
-            loseGame();
+            
+            // 3-Strike Rule Logic
+            lives--;
+            livesDisplay.innerText = `Lives: ${lives}`;
+            
+            if (lives <= 0) {
+                loseGame();
+            } else {
+                // Restart current level
+                clearInterval(timerInterval);
+                gameState = 'IDLE';
+                messageDisplay.innerText = "TRY AGAIN!";
+                setTimeout(retryLevel, 1000);
+            }
         }
     }
 
@@ -455,10 +552,12 @@
         if (currentLevel < 9) {
             messageDisplay.innerHTML = `<span class="text-yellow-300">NEXT LEVEL!</span>`;
             currentLevel++;
+            lives = 3; // Reset lives for the new level
             setTimeout(startGame, 1200);
         } else {
             messageDisplay.innerText = "MEMORY KING!";
             currentLevel = 1;
+            lives = 3; // Reset for new game
             setTimeout(() => {
                 menuArea.classList.remove('hidden');
                 gameBoard.classList.add('hidden');
@@ -473,8 +572,14 @@
         gameState = 'ENDED';
         document.querySelectorAll('.number-block').forEach(b => b.classList.remove('hidden-num'));
         
-        const randomPraise = praises[Math.floor(Math.random() * praises.length)];
-        modalTitle.innerText = randomPraise;
+        if (currentLevel === 2 || currentLevel === 3) {
+            modalTitle.innerText = "Good enough, but try harder!";
+        } else {
+            const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+            modalTitle.innerText = randomPraise;
+        }
+        
+        // Capture level before reset
         modalText.innerText = `You reached Level ${currentLevel}! Try again!`;
         
         overlay.classList.remove('hidden');
@@ -485,6 +590,9 @@
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
         gameState = 'IDLE';
+        // When closing the "Game Over" modal, we restart from Level 1
+        currentLevel = 1; 
+        lives = 3; 
         startGame();
     }
 
@@ -493,5 +601,3 @@
 
 </body>
 </html>
-
-
