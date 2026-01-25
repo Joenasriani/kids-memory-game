@@ -67,6 +67,12 @@
             justify-content: center;
             aspect-ratio: 1 / 1;
         }
+
+        /* Interaction Lock Class */
+        .number-block.locked {
+            cursor: default;
+            pointer-events: none; /* Disables clicks and :active state */
+        }
         
         @media (min-width: 768px) {
             .number-block { box-shadow: 0 10px 0 rgb(180, 83, 9); }
@@ -109,9 +115,13 @@
         }
 
         .game-canvas {
-            /* Smart sizing: fits width but capped by height to ensure square fits on screen */
+            /* Smart sizing logic:
+               - min(90vw, 60vh): Ensures the grid never overflows width OR height.
+               - On Phones (Portrait): Width limits it (90vw).
+               - On Tablets/TVs (Landscape): Height limits it (60vh), ensuring headers/footers fit.
+            */
             width: 100%;
-            max-width: min(85vw, 55vh); 
+            max-width: min(90vw, 60vh); 
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: clamp(10px, 2vw, 24px); /* Responsive gap */
@@ -124,7 +134,8 @@
                 max-width: min(50vw, 65vh); /* Allow slightly taller relative to height in landscape */
                 gap: 8px;
             }
-            .vine { display: none; } /* Hide vines to clear view */
+            /* Hide vines on short screens to clear view */
+            .vine { display: none; } 
         }
 
         .level-up-anim {
@@ -223,8 +234,9 @@
     <!-- Praise Pop-up -->
     <div id="praise-pop" class="fredoka text-4xl sm:text-7xl text-yellow-300">NICE!</div>
 
-    <!-- Header Section (Flex-none to keep size stable) -->
-    <div class="w-full max-w-6xl flex justify-between items-start pt-4 px-4 sm:px-8 z-10 flex-none landscape:pt-2">
+    <!-- Header Section -->
+    <!-- landscape:pt-1 reduces padding on landscape screens to save vertical space -->
+    <div class="w-full max-w-6xl flex justify-between items-start pt-4 px-4 sm:px-8 z-10 flex-none landscape:pt-1">
         <div class="monkey-float flex flex-col items-center">
             <svg class="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 landscape:w-12 landscape:h-12" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="rgb(120, 53, 15)" />
@@ -259,7 +271,7 @@
         <div id="menu-area" class="w-full flex flex-col items-center justify-center">
             <div id="instructions" class="bg-white/20 backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl mb-4 sm:mb-8 text-center max-w-[85vw] sm:max-w-md border-2 border-white/30 shadow-xl">
                 <h2 class="fredoka text-white text-xl sm:text-3xl mb-2 sm:mb-4">How to Play</h2>
-                <p class="text-white text-sm sm:text-lg lg:text-xl leading-relaxed">Memorize the positions of the numbers. Tap them in order (1, 2, 3...) when they hide. You have 3 lives!</p>
+                <p class="text-white text-sm sm:text-lg lg:text-xl leading-relaxed">Memorize the positions of the numbers. Tap them in order (1, 2, 3...) when they hide. You have 3 chances!</p>
             </div>
             
             <button id="start-btn" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-8 py-4 sm:px-16 sm:py-8 lg:px-20 lg:py-10 rounded-2xl sm:rounded-[2.5rem] fredoka text-2xl sm:text-5xl lg:text-6xl flex items-center gap-3 sm:gap-6 border-b-[6px] sm:border-b-[12px] border-yellow-600 active:border-b-0 active:translate-y-2 transition-all shadow-2xl">
@@ -291,13 +303,6 @@
 </div>
 
 <script>
-    // --- BANKED ASSETS & DATA ---
-    const praises = [
-        "GOOD JOB!", "GREAT!", "BRAVO!", "NICE!", "AWESOME!", 
-        "YOU GOT IT!", "SUPER!", "BRILLIANT!", "FANTASTIC!", 
-        "KEEP IT UP!", "YOU ARE THE BEST!", "YOU MUST BE A CHAMPION!", "WOW!"
-    ];
-
     // --- GAME STATE VARIABLES ---
     const gameBoard = document.getElementById('game-board');
     const startBtn = document.getElementById('start-btn');
@@ -319,8 +324,53 @@
     let gameState = 'IDLE'; 
     let startTime;
     let timerInterval;
-    let memInterval; // Global variable for memorization timer
+    let memInterval; 
     let lives = 3;
+    let inactivityTimer;
+    
+    const INACTIVITY_LIMIT = 3 * 60 * 1000; // 3 minutes
+
+    // --- RESET GAME TO HOME FUNCTION ---
+    function resetGameToHome() {
+        clearInterval(timerInterval);
+        clearInterval(memInterval);
+        currentLevel = 1;
+        lives = 3;
+        gameState = 'IDLE';
+        levelDisplay.innerText = `Level: 1`;
+        livesDisplay.innerText = `Lives: 3`;
+        timerDisplay.innerText = '0.0s';
+        const blocks = document.querySelectorAll('.number-block');
+        blocks.forEach(b => {
+            b.classList.remove('shake');
+            b.classList.remove('hidden-num');
+            b.classList.remove('locked'); 
+        });
+        gameBoard.classList.add('hidden');
+        messageDisplay.classList.add('hidden');
+        messageDisplay.classList.remove('block');
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        menuArea.classList.remove('hidden');
+        startBtn.innerText = "START";
+    }
+
+    // --- INACTIVITY TIMER LOGIC ---
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        // Only set the timer if we are NOT on the home screen (i.e., game is active or ended)
+        if (gameState !== 'IDLE' || !menuArea.classList.contains('hidden')) {
+             inactivityTimer = setTimeout(resetGameToHome, INACTIVITY_LIMIT);
+        }
+    }
+
+    // Listen for interactions to reset timer
+    ['click', 'touchstart', 'mousemove', 'keydown'].forEach(evt => {
+        document.addEventListener(evt, resetInactivityTimer);
+    });
+
+    // Start inactivity timer initially
+    resetInactivityTimer();
 
     // --- FULL SCREEN LOGIC ---
     fsBtn.addEventListener('click', () => {
@@ -334,47 +384,29 @@
     });
 
     // --- RESET / HOME LOGIC ---
-    resetBtn.addEventListener('click', () => {
-        // Clear all timers
-        clearInterval(timerInterval);
-        clearInterval(memInterval);
-        
-        // Reset Logic
-        currentLevel = 1;
-        lives = 3;
-        gameState = 'IDLE';
-        
-        // Reset Displays
-        levelDisplay.innerText = `Level: 1`;
-        livesDisplay.innerText = `Lives: 3`;
-        timerDisplay.innerText = '0.0s';
-        
-        // Clear Block Effects
-        const blocks = document.querySelectorAll('.number-block');
-        blocks.forEach(b => {
-            b.classList.remove('shake');
-            b.classList.remove('hidden-num');
-        });
-
-        // Hide Game Elements
-        gameBoard.classList.add('hidden');
-        messageDisplay.classList.add('hidden');
-        messageDisplay.classList.remove('block');
-        overlay.classList.add('hidden');
-        overlay.classList.remove('flex');
-        
-        // Show Main Menu
-        menuArea.classList.remove('hidden');
-        startBtn.innerText = "START";
-    });
+    resetBtn.addEventListener('click', resetGameToHome);
 
     // --- AUDIO SYSTEM DISABLED ---
     function initAudio() { }
     function playSound(type) { return; }
 
-    // --- VISUAL EFFECTS ---
+    // --- VISUAL EFFECTS (PROGRESSIVE PRAISE) ---
     function showPraisePop() {
-        const praiseText = praises[Math.floor(Math.random() * praises.length)];
+        const praiseMap = {
+            1: ["Good!", "Nice.", "Okay."],
+            2: ["That's it!", "Correct.", "Right."],
+            3: ["Good Job!", "Well Done!", "Keep it up!"],
+            4: ["Great!", "Super!", "Sharp!"],
+            5: ["Awesome!", "Amazing!", "Wow!"],
+            6: ["Brilliant!", "Excellent!", "Perfect!"],
+            7: ["Fantastic!", "Stellar!", "Genius!"],
+            8: ["Incredible!", "Master!", "Legend!"],
+            9: ["UNBEATABLE!", "CHAMPION!", "GODLIKE!"]
+        };
+
+        const options = praiseMap[currentLevel] || praiseMap[9];
+        const praiseText = options[Math.floor(Math.random() * options.length)];
+        
         praisePop.innerText = praiseText;
         praisePop.classList.add('active');
         
@@ -406,7 +438,7 @@
             if (activeIndex !== -1) {
                 const num = levelNumbers[activeIndex];
                 const block = document.createElement('div');
-                block.className = 'number-block bg-yellow-400 rounded-xl sm:rounded-2xl text-3xl sm:text-6xl fredoka text-white border-2 sm:border-4 border-yellow-200';
+                block.className = 'number-block locked bg-yellow-400 rounded-xl sm:rounded-2xl text-3xl sm:text-6xl fredoka text-white border-2 sm:border-4 border-yellow-200';
                 block.innerHTML = `<span>${num}</span>`;
                 block.dataset.number = num;
                 block.onclick = () => handleBlockClick(block);
@@ -416,26 +448,23 @@
         }
     }
 
-    // New Function: Resets the level WITHOUT shuffling
     function retryLevel() {
         gameState = 'MEMORIZING';
         currentStep = 1;
-        messageDisplay.innerText = "MEMORIZE WHERE EACH NUMBER IS";
+        messageDisplay.innerText = "MEMORIZE WHERE EACH NUMBER IS"; // Static for memorization
 
-        // Reset all blocks visually
         const blocks = document.querySelectorAll('.number-block');
         blocks.forEach(b => {
             b.classList.remove('hidden-num');
             b.classList.remove('opacity-50');
             b.classList.remove('bg-green-400');
             b.classList.add('bg-yellow-400');
+            b.classList.add('locked');
         });
 
-        // Restart timer
         let memCountdown = Math.max(1, 3 - Math.floor(currentLevel / 4)); 
         timerDisplay.innerText = `${memCountdown}s`;
         
-        // Use global memInterval
         clearInterval(memInterval);
         memInterval = setInterval(() => {
             memCountdown--;
@@ -453,7 +482,6 @@
         initAudio();
         if (gameState === 'MEMORIZING' || gameState === 'PLAYING') return;
         
-        // Check if we need to reset lives (New Game)
         if (currentLevel === 1) {
             lives = 3;
         }
@@ -462,7 +490,7 @@
         menuArea.classList.add('hidden');
         gameBoard.classList.remove('hidden');
         messageDisplay.classList.remove('hidden');
-        messageDisplay.classList.add('block'); // ensure block display
+        messageDisplay.classList.add('block'); 
 
         levelDisplay.innerText = `Level: ${currentLevel}`;
         levelDisplay.classList.remove('level-up-anim');
@@ -472,12 +500,11 @@
         createBlocks();
         gameState = 'MEMORIZING';
         currentStep = 1;
-        messageDisplay.innerText = "MEMORIZE WHERE EACH NUMBER IS";
+        messageDisplay.innerText = "MEMORIZE WHERE EACH NUMBER IS"; // Static for memorization
         
         let memCountdown = Math.max(1, 3 - Math.floor(currentLevel / 4)); 
         timerDisplay.innerText = `${memCountdown}s`;
         
-        // Use global memInterval
         clearInterval(memInterval);
         memInterval = setInterval(() => {
             memCountdown--;
@@ -500,7 +527,12 @@
             messageDisplay.innerText = "TAP THE NUMBERS IN THE RIGHT ORDER!";
         }
 
-        document.querySelectorAll('.number-block').forEach(b => b.classList.add('hidden-num'));
+        const blocks = document.querySelectorAll('.number-block');
+        blocks.forEach(b => {
+            b.classList.add('hidden-num');
+            b.classList.remove('locked');
+        });
+        
         startTime = Date.now();
         timerInterval = setInterval(updateTimer, 100);
     }
@@ -527,14 +559,12 @@
             block.classList.add('shake', 'bg-red-500');
             setTimeout(() => block.classList.remove('shake', 'bg-red-500'), 400);
             
-            // 3-Strike Rule Logic
             lives--;
             livesDisplay.innerText = `Lives: ${lives}`;
             
             if (lives <= 0) {
                 loseGame();
             } else {
-                // Restart current level
                 clearInterval(timerInterval);
                 gameState = 'IDLE';
                 messageDisplay.innerText = "TRY AGAIN!";
@@ -552,12 +582,12 @@
         if (currentLevel < 9) {
             messageDisplay.innerHTML = `<span class="text-yellow-300">NEXT LEVEL!</span>`;
             currentLevel++;
-            lives = 3; // Reset lives for the new level
+            lives = 3; 
             setTimeout(startGame, 1200);
         } else {
             messageDisplay.innerText = "MEMORY KING!";
             currentLevel = 1;
-            lives = 3; // Reset for new game
+            lives = 3; 
             setTimeout(() => {
                 menuArea.classList.remove('hidden');
                 gameBoard.classList.add('hidden');
@@ -575,12 +605,10 @@
         if (currentLevel === 2 || currentLevel === 3) {
             modalTitle.innerText = "Good enough, but try harder!";
         } else {
-            const randomPraise = praises[Math.floor(Math.random() * praises.length)];
-            modalTitle.innerText = randomPraise;
+            modalTitle.innerText = "Nice Try!"; 
         }
         
-        // Capture level before reset
-        modalText.innerText = `You reached Level ${currentLevel}! Try again!`;
+        modalText.innerText = `You reached Level ${currentLevel}!`;
         
         overlay.classList.remove('hidden');
         overlay.classList.add('flex');
@@ -590,7 +618,6 @@
         overlay.classList.add('hidden');
         overlay.classList.remove('flex');
         gameState = 'IDLE';
-        // When closing the "Game Over" modal, we restart from Level 1
         currentLevel = 1; 
         lives = 3; 
         startGame();
