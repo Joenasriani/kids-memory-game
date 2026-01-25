@@ -46,7 +46,7 @@
             position: absolute;
             width: 40px;
             height: 25px;
-            background: rgb(21, 128, 61); /* Darker Green */
+            background: rgb(21, 128, 61); /* Reverted to previous Green */
             border-radius: 50% 0 50% 0;
             transform: rotate(-15deg);
         }
@@ -115,13 +115,9 @@
         }
 
         .game-canvas {
-            /* Smart sizing logic:
-               - min(90vw, 60vh): Ensures the grid never overflows width OR height.
-               - On Phones (Portrait): Width limits it (90vw).
-               - On Tablets/TVs (Landscape): Height limits it (60vh), ensuring headers/footers fit.
-            */
+            /* Smart sizing: fits width but capped by height to ensure square fits on screen */
             width: 100%;
-            max-width: min(90vw, 60vh); 
+            max-width: min(85vw, 55vh); 
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: clamp(10px, 2vw, 24px); /* Responsive gap */
@@ -131,7 +127,7 @@
         /* Landscape adjustments for short screens (mobile landscape) */
         @media (max-height: 500px) and (orientation: landscape) {
             .game-canvas {
-                max-width: min(50vw, 65vh); /* Allow slightly taller relative to height in landscape */
+                max-width: min(50vw, 50vh); /* Reduced height constraint slightly to accommodate larger headers */
                 gap: 8px;
             }
             /* Hide vines on short screens to clear view */
@@ -235,8 +231,8 @@
     <div id="praise-pop" class="fredoka text-4xl sm:text-7xl text-yellow-300">NICE!</div>
 
     <!-- Header Section -->
-    <!-- landscape:pt-1 reduces padding on landscape screens to save vertical space -->
-    <div class="w-full max-w-6xl flex justify-between items-start pt-4 px-4 sm:px-8 z-10 flex-none landscape:pt-1">
+    <!-- Added pt-8 (mobile) and pt-12 (desktop) for top breathing room -->
+    <div class="w-full max-w-6xl flex justify-between items-start pt-8 px-6 sm:pt-12 sm:px-10 z-10 flex-none landscape:pt-4">
         <div class="monkey-float flex flex-col items-center">
             <svg class="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 landscape:w-12 landscape:h-12" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="rgb(120, 53, 15)" />
@@ -288,7 +284,8 @@
     </div>
 
     <!-- Footer Area (Flex-none) -->
-    <div class="w-full flex-none h-16 sm:h-20 lg:h-24 flex items-start justify-center z-10 landscape:h-12">
+    <!-- Added pb-8 (mobile) and pb-12 (desktop) for bottom breathing room -->
+    <div class="w-full flex-none h-auto pb-8 sm:pb-12 flex items-start justify-center z-10 landscape:pb-4">
         <div id="message" class="fredoka text-xl sm:text-3xl lg:text-4xl text-white text-center hidden drop-shadow-lg animate-bounce"></div>
     </div>
 
