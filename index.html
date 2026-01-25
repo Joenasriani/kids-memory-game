@@ -231,10 +231,11 @@
     <div id="praise-pop" class="fredoka text-4xl sm:text-7xl text-yellow-300">NICE!</div>
 
     <!-- Header Section -->
-    <!-- Added pt-8 (mobile) and pt-12 (desktop) for top breathing room -->
-    <div class="w-full max-w-6xl flex justify-between items-start pt-8 px-6 sm:pt-12 sm:px-10 z-10 flex-none landscape:pt-4">
+    <!-- Increased padding: pt-12 (mobile), pt-16 (tablet), pt-24 (desktop) -->
+    <div class="w-full max-w-7xl flex justify-between items-start pt-12 px-6 sm:pt-16 sm:px-10 lg:pt-24 lg:px-16 z-10 flex-none landscape:pt-4">
         <div class="monkey-float flex flex-col items-center">
-            <svg class="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 landscape:w-12 landscape:h-12" viewBox="0 0 100 100">
+            <!-- Scaled up monkey SVG for larger screens -->
+            <svg class="w-14 h-14 sm:w-24 sm:h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 landscape:w-12 landscape:h-12" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="rgb(120, 53, 15)" />
                 <circle cx="50" cy="55" r="32" fill="rgb(217, 119, 6)" opacity="0.4" />
                 <circle cx="15" cy="50" r="12" fill="rgb(120, 53, 15)" />
@@ -246,14 +247,17 @@
                 <path d="M 35 65 Q 50 75 65 65" stroke="white" stroke-width="3" fill="transparent" />
             </svg>
             <div class="bg-yellow-400 p-2 rounded-full border-4 border-yellow-600 shadow-lg -mt-2 z-20">
-                <div id="timer" class="fredoka text-lg sm:text-xl lg:text-2xl text-yellow-900 leading-none px-2 min-w-[3ch] text-center">0.0s</div>
+                <!-- Scaled up timer text -->
+                <div id="timer" class="fredoka text-lg sm:text-2xl lg:text-4xl xl:text-5xl text-yellow-900 leading-none px-2 min-w-[3ch] text-center">0.0s</div>
             </div>
         </div>
 
         <div class="text-right mr-12 sm:mr-0">
-            <h1 class="fredoka text-lg sm:text-2xl lg:text-4xl text-white drop-shadow-lg text-right leading-tight">THE MEMORY<br>CHALLENGE</h1>
-            <div id="level-indicator" class="text-yellow-200 fredoka text-base sm:text-xl lg:text-2xl mt-1">Level: 1</div>
-            <div id="lives-indicator" class="text-yellow-200 fredoka text-base sm:text-xl lg:text-2xl mt-1">Lives: 3</div>
+            <!-- Scaled up Title text -->
+            <h1 class="fredoka text-lg sm:text-3xl lg:text-5xl xl:text-6xl text-white drop-shadow-lg text-right leading-tight">THE MEMORY<br>CHALLENGE</h1>
+            <!-- Scaled up Level & Lives text -->
+            <div id="level-indicator" class="text-yellow-200 fredoka text-base sm:text-2xl lg:text-3xl xl:text-4xl mt-1 sm:mt-2">Level: 1</div>
+            <div id="lives-indicator" class="text-yellow-200 fredoka text-base sm:text-2xl lg:text-3xl xl:text-4xl mt-1">Lives: 3</div>
         </div>
     </div>
 
@@ -265,13 +269,13 @@
 
         <!-- Main Menu & Instructions -->
         <div id="menu-area" class="w-full flex flex-col items-center justify-center">
-            <div id="instructions" class="bg-white/20 backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl mb-4 sm:mb-8 text-center max-w-[85vw] sm:max-w-md border-2 border-white/30 shadow-xl">
-                <h2 class="fredoka text-white text-xl sm:text-3xl mb-2 sm:mb-4">How to Play</h2>
-                <p class="text-white text-sm sm:text-lg lg:text-xl leading-relaxed">Memorize the positions of the numbers. Tap them in order (1, 2, 3...) when they hide. You have 3 chances!</p>
+            <div id="instructions" class="bg-white/20 backdrop-blur-sm p-4 sm:p-6 lg:p-10 rounded-2xl sm:rounded-3xl mb-4 sm:mb-8 text-center max-w-[85vw] sm:max-w-md lg:max-w-2xl border-2 border-white/30 shadow-xl">
+                <h2 class="fredoka text-white text-xl sm:text-3xl lg:text-5xl mb-2 sm:mb-4">How to Play</h2>
+                <p class="text-white text-sm sm:text-lg lg:text-2xl leading-relaxed">Memorize the positions of the numbers. Tap them in order (1, 2, 3...) when they hide. You have 3 chances!</p>
             </div>
             
-            <button id="start-btn" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-8 py-4 sm:px-16 sm:py-8 lg:px-20 lg:py-10 rounded-2xl sm:rounded-[2.5rem] fredoka text-2xl sm:text-5xl lg:text-6xl flex items-center gap-3 sm:gap-6 border-b-[6px] sm:border-b-[12px] border-yellow-600 active:border-b-0 active:translate-y-2 transition-all shadow-2xl">
-                <svg class="w-6 h-6 sm:w-12 sm:h-12 lg:w-16 lg:h-16" fill="currentColor" viewBox="0 0 24 24">
+            <button id="start-btn" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-8 py-4 sm:px-16 sm:py-8 lg:px-24 lg:py-12 rounded-2xl sm:rounded-[2.5rem] fredoka text-2xl sm:text-5xl lg:text-7xl flex items-center gap-3 sm:gap-6 border-b-[6px] sm:border-b-[12px] border-yellow-600 active:border-b-0 active:translate-y-2 transition-all shadow-2xl">
+                <svg class="w-6 h-6 sm:w-12 sm:h-12 lg:w-20 lg:h-20" fill="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="15" r="5" />
                     <circle cx="6" cy="7" r="3" />
                     <circle cx="12" cy="5" r="3" />
@@ -284,9 +288,9 @@
     </div>
 
     <!-- Footer Area (Flex-none) -->
-    <!-- Added pb-8 (mobile) and pb-12 (desktop) for bottom breathing room -->
-    <div class="w-full flex-none h-auto pb-8 sm:pb-12 flex items-start justify-center z-10 landscape:pb-4">
-        <div id="message" class="fredoka text-xl sm:text-3xl lg:text-4xl text-white text-center hidden drop-shadow-lg animate-bounce"></div>
+    <!-- Increased padding: pb-12 (mobile), pb-16 (tablet), pb-24 (desktop) -->
+    <div class="w-full flex-none h-auto pb-12 sm:pb-16 lg:pb-24 flex items-start justify-center z-10 landscape:pb-4">
+        <div id="message" class="fredoka text-xl sm:text-3xl lg:text-5xl text-white text-center hidden drop-shadow-lg animate-bounce"></div>
     </div>
 
     <!-- Error/Game Over Modal -->
