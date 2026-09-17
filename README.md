@@ -4,7 +4,7 @@ Canonical play URL: https://kids-memory-game-xi.vercel.app/
 
 GitHub Pages mirror: https://joenasriani.github.io/kids-memory-game/
 
-The Memory Challenge is a nine-level visual number-position memory game created for the UAE children’s event project.
+The Memory Challenge is a nine-level visual number-position memory game developed as part of a multi-game interactive children’s edutainment activation in the UAE.
 
 ## Game structure
 
@@ -21,9 +21,9 @@ The number of active blocks equals the current level:
 
 The memorization window shortens as the level increases. A wrong tap costs one life and restarts the same level. Each completed level restores the run to three lives.
 
-## Event context
+## Activation context
 
-This game belongs to the same `kids-*` set created for the UAE children’s event project.
+This game belongs to the same `kids-*` game set developed for the multi-game interactive children’s edutainment activation in the UAE.
 
 ## What the repository demonstrates
 
