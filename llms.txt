@@ -1,0 +1,13 @@
+# The Memory Challenge
+
+Canonical play URL: https://kids-memory-game-xi.vercel.app/
+GitHub Pages mirror: https://joenasriani.github.io/kids-memory-game/
+Repository: https://github.com/Joenasriani/kids-memory-game
+
+The Memory Challenge is a nine-level visual number-position memory game developed as part of a multi-game interactive children’s edutainment activation in the UAE.
+
+Core interaction: show numbered positions → hide numbers → recall positions → tap 1, 2, 3… in order → complete the sequence → advance.
+
+The number of active blocks matches the level number from 1 through 9. A wrong tap removes one life and repeats the level; completing a level restores the run to three lives.
+
+The repository does not contain evidence measuring memory improvement or transfer outside the game.
