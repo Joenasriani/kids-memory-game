@@ -1,36 +1,36 @@
 # The Memory Challenge
 
-Canonical play URL: https://kids-memory-game-xi.vercel.app/
+Play: https://kids-memory-game-xi.vercel.app/
 
 GitHub Pages mirror: https://joenasriani.github.io/kids-memory-game/
 
-The Memory Challenge is a nine-level visual number-position memory game developed as part of a multi-game interactive children’s edutainment activation in the UAE.
+The Memory Challenge is a nine-level visual number-position memory game.
 
-## Game structure
+## How it plays
 
-Each level places numbered blocks in random positions on a 3×3 grid. The player first sees the numbers, then the numbers hide. The player must tap the hidden positions in ascending numerical order.
+Each level places numbered blocks at random positions on a 3×3 grid. The numbers are shown briefly and then hidden. The player must tap the hidden positions in ascending numerical order.
 
 **show numbered positions → hide numbers → recall positions → tap 1, 2, 3… in order → complete sequence → advance level**
 
-The number of active blocks equals the current level:
+The number of active blocks equals the level number:
 
 - Level 1: 1 block
 - Level 2: 2 blocks
 - …
 - Level 9: 9 blocks
 
-The memorization window shortens as the level increases. A wrong tap costs one life and restarts the same level. Each completed level restores the run to three lives.
+The memorization window shortens as difficulty increases. A wrong tap costs one life and restarts the same level. Completing a level restores the run to three lives.
 
-## Activation context
+## Content note
 
-This game belongs to the same `kids-*` game set developed for the multi-game interactive children’s edutainment activation in the UAE.
+The mechanic exercises short-term recall of spatial positions and numerical order. It is not a validated cognitive or memory assessment.
 
-## What the repository demonstrates
+## Implementation
 
-The implemented mechanic requires short-term recall of spatial positions and numerical order. The repository does not contain a study measuring memory improvement, learning transfer, retention, or cognitive outcomes outside the game.
+The playable game is contained in `index.html`.
 
-## Repository scope
+## Event activation
 
-The playable implementation is contained in `index.html`.
+This game was developed as one module in a multi-game interactive children’s edutainment activation in the UAE.
 
-The game file is preserved as the playable artifact. Documentation and discovery files must not change levels, timing, lives, number placement, answer logic, controls, visuals, reset behavior, or runtime behavior.
+Event production: [Peach Society](https://peach-society.com/) — Dubai-based event and experiential production company.
